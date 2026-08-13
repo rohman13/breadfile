@@ -11,6 +11,7 @@ export const categories = [
       { id: 'rotate', name: 'Rotate Pages', icon: 'rotate-cw', subtitle: 'Rotate one, many, or all pages.' },
       { id: 'organize', name: 'Organize Pages', icon: 'grip', subtitle: 'Reorder pages with drag and drop.' },
       { id: 'compress', name: 'Compress PDF', icon: 'minimize-2', subtitle: 'Make image-heavy PDFs smaller.' },
+      { id: 'sign-pdf', name: 'Sign PDF', icon: 'pen-line', subtitle: 'Draw, type, or upload a signature or stamp.' },
       { id: 'image-to-pdf', name: 'Images to PDF', icon: 'images', subtitle: 'Turn JPG, PNG, or WebP images into one PDF.' },
       { id: 'pdf-to-images', name: 'PDF to Images', icon: 'file-image', subtitle: 'Save every page as JPG or PNG.' },
     ],

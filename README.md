@@ -13,6 +13,7 @@ A quiet, privacy-first PDF workshop that runs entirely in the browser.
 - Rotate pages
 - Organize pages
 - Compress PDF
+- Sign PDFs with a drawn, typed, or uploaded signature/stamp
 - Images to PDF
 - PDF to JPG or PNG
 

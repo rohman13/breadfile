@@ -1477,94 +1477,60 @@ compress: () => `
     `,
 
     'sign-pdf': () => `
-    <h2 class="text-2xl font-bold text-white mb-4">Sign PDF</h2>
-    <p class="mb-6 text-gray-400">Create your signature, select it, then click on the document to place. You can drag to move placed signatures.</p>
+    <h2>Sign PDF</h2>
+    <p class="sign-intro">Draw, type, or upload a signature or company stamp, then place it anywhere on your PDF.</p>
+    <div class="signature-explainer" role="note">
+        <i data-lucide="info" aria-hidden="true"></i>
+        <div><strong>A quick note about signatures</strong><p>This adds a visible electronic signature or stamp to the page—like signing printed paper. It does not create a certificate-based cryptographic digital signature.</p></div>
+    </div>
     ${createFileInputHTML()}
     
-    <div id="signature-editor" class="hidden mt-6">
-        <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 mb-4">
-            <div class="flex border-b border-gray-700 mb-4">
-                <button id="draw-tab-btn" class="flex-1 p-2 text-sm font-semibold border-b-2 border-indigo-500 text-white">Draw</button>
-                <button id="type-tab-btn" class="flex-1 p-2 text-sm font-semibold border-b-2 border-transparent text-gray-400">Type</button>
-                <button id="upload-tab-btn" class="flex-1 p-2 text-sm font-semibold border-b-2 border-transparent text-gray-400">Upload</button>
+    <div id="signature-editor" class="hidden signature-editor">
+        <section class="signature-maker" aria-labelledby="signature-maker-title">
+            <div class="signature-step"><span>1</span><div><strong id="signature-maker-title">Make or upload your mark</strong><small>Nothing is uploaded or stored after you leave.</small></div></div>
+            <div class="signature-tabs" role="tablist" aria-label="Signature source">
+                <button id="draw-tab-btn" class="is-active" type="button">Draw</button>
+                <button id="type-tab-btn" type="button">Type</button>
+                <button id="upload-tab-btn" type="button">Upload stamp</button>
             </div>
             
             <div id="draw-panel">
-                <canvas id="signature-draw-canvas" class="bg-white rounded-md cursor-crosshair w-full" height="150"></canvas>
-                
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-2 gap-4 sm:gap-2">
-                    <div class="flex items-center gap-2">
-                        <label for="signature-color" class="text-sm font-medium text-gray-300">Color:</label>
-                        <input type="color" id="signature-color" value="#22c55e" class="w-10 h-10 bg-gray-700 border border-gray-600 rounded-lg p-1 cursor-pointer">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button id="clear-draw-btn" class="btn hover:bg-gray-600 text-sm flex-grow sm:flex-grow-0">Clear</button>
-                        <button id="save-draw-btn" class="btn-gradient px-4 py-2 text-sm rounded-lg flex-grow sm:flex-grow-0">Save Signature</button>
-                    </div>
+                <canvas id="signature-draw-canvas" aria-label="Draw your signature" height="160"></canvas>
+                <div class="signature-controls">
+                    <label for="signature-color">Ink <input type="color" id="signature-color" value="#384d59"></label>
+                    <div><button id="clear-draw-btn" class="signature-secondary" type="button">Clear</button><button id="save-draw-btn" class="signature-primary" type="button">Use this drawing</button></div>
                 </div>
             </div>
 
             <div id="type-panel" class="hidden">
-                <input type="text" id="signature-text-input" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-2.5 mb-4" placeholder="Type your name here">
-                
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label for="font-family-select" class="block mb-1 text-xs font-medium text-gray-400">Font Style</label>
-                        <select id="font-family-select" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-2 text-sm">
-                            <option value="'Great Vibes', cursive">Signature</option>
-                            <option value="'Kalam', cursive">Handwritten</option>
-                            <option value="'Dancing Script', cursive">Script</option>
-                            <option value="'Lato', sans-serif">Regular</option>
-                            <option value="'Merriweather', serif">Formal</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label for="font-size-slider" class="block mb-1 text-xs font-medium text-gray-400">Font Size (<span id="font-size-value">48</span>px)</label>
-                        <input type="range" id="font-size-slider" min="24" max="72" value="32" class="w-full">
-                    </div>
-                    <div>
-                        <label for="font-color-picker" class="block mb-1 text-xs font-medium text-gray-400">Color</label>
-                        <input type="color" id="font-color-picker" value="#22c55e" class="w-full h-[38px] bg-gray-700 border border-gray-600 rounded-lg p-1 cursor-pointer">
-                    </div>
+                <label class="signature-field">Your name<input type="text" id="signature-text-input" placeholder="Type your name"></label>
+                <div class="signature-field-grid">
+                    <label class="signature-field">Style<select id="font-family-select"><option value="'Great Vibes', cursive">Signature</option><option value="'Kalam', cursive">Handwritten</option><option value="'Dancing Script', cursive">Script</option><option value="Georgia, serif">Formal</option></select></label>
+                    <label class="signature-field">Ink<input type="color" id="font-color-picker" value="#384d59"></label>
                 </div>
-
-                <div id="font-preview" class="p-4 h-[80px] bg-transparent rounded-md flex items-center justify-center text-4xl" style="font-family: 'Great Vibes', cursive; font-size: 32px; color: #22c55e;">Your Name</div>
-                 
-                <div class="flex justify-end mt-4">
-                    <button id="save-type-btn" class="btn-gradient px-4 py-2 text-sm rounded-lg">Save Signature</button>
-                </div>
+                <div id="font-preview" class="signature-type-preview">Your name</div>
+                <button id="save-type-btn" class="signature-primary" type="button">Use this typed signature</button>
             </div>
 
             <div id="upload-panel" class="hidden">
-                <input type="file" id="signature-upload-input" accept="image/png" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
-                *png files only
+                <label class="signature-upload" for="signature-upload-input"><i data-lucide="image-up"></i><strong>Choose a signature or stamp image</strong><small>PNG, JPG, or WebP · up to 10 MB · transparent PNG works best</small></label>
+                <input type="file" id="signature-upload-input" accept="image/png,image/jpeg,image/webp" class="sr-only">
             </div>
-            
-            <hr class="border-gray-700 my-4">
-            <h4 class="text-md font-semibold text-white mb-2">Your Saved Signatures</h4>
-            <div id="saved-signatures-container" class="flex flex-wrap gap-2 bg-gray-800 p-2 rounded-md min-h-[50px]">
-                <p class="text-xs text-gray-500 text-center w-full">Your saved signatures will appear here. Click one to select it.</p>
+
+            <div class="signature-library-heading"><strong>Your marks</strong><small>Choose one, then tap the document.</small></div>
+            <div id="saved-signatures-container" class="signature-library"></div>
+        </section>
+
+        <section class="signature-document" aria-labelledby="signature-document-title">
+            <div class="signature-step"><span>2</span><div><strong id="signature-document-title">Place it on the document</strong><small id="signature-status" aria-live="polite">Create or upload a mark, then tap the page.</small></div></div>
+            <div class="signature-toolbar">
+                <div><button id="prev-page-sign" type="button" aria-label="Previous page"><i data-lucide="chevron-left"></i></button><span>Page <strong id="current-page-display-sign">1</strong> of <strong id="total-pages-display-sign">1</strong></span><button id="next-page-sign" type="button" aria-label="Next page"><i data-lucide="chevron-right"></i></button></div>
+                <div><button id="zoom-out-btn" type="button" aria-label="Zoom out"><i data-lucide="zoom-out"></i></button><button id="fit-width-btn" type="button" aria-label="Fit width"><i data-lucide="scan"></i></button><button id="zoom-in-btn" type="button" aria-label="Zoom in"><i data-lucide="zoom-in"></i></button><button id="undo-btn" type="button" aria-label="Undo last placement"><i data-lucide="undo-2"></i></button><button id="delete-signature-btn" type="button" aria-label="Delete selected signature" disabled><i data-lucide="trash-2"></i></button></div>
             </div>
-        </div>
-
-        <div class="flex flex-wrap items-center justify-center gap-4 mb-4 p-3 bg-gray-900 rounded-lg border border-gray-700">
-            <button id="prev-page-sign" class="btn p-2 rounded-full bg-gray-700 hover:bg-gray-600 disabled:opacity-50"><i data-lucide="chevron-left"></i></button>
-            <span class="text-white font-medium">Page <span id="current-page-display-sign">1</span> of <span id="total-pages-display-sign">1</span></span>
-            <button id="next-page-sign" class="btn p-2 rounded-full bg-gray-700 hover:bg-gray-600 disabled:opacity-50"><i data-lucide="chevron-right"></i></button>
-            <div class="border-l border-gray-600 h-6 mx-2 hidden sm:block"></div>
-            <button id="zoom-out-btn" class="btn p-2 rounded-full bg-gray-700 hover:bg-gray-600"><i data-lucide="zoom-out"></i></button>
-            <button id="fit-width-btn" class="btn p-2 rounded-full bg-gray-700 hover:bg-gray-600"><i data-lucide="minimize"></i></button>
-            <button id="zoom-in-btn" class="btn p-2 rounded-full bg-gray-700 hover:bg-gray-600"><i data-lucide="zoom-in"></i></button>
-            <div class="border-l border-gray-600 h-6 mx-2 hidden sm:block"></div>
-            <button id="undo-btn" class="btn p-2 rounded-full" title="Undo Last Placement"><i data-lucide="undo-2"></i></button>
-        </div>
-
-        <div id="canvas-container-sign" class="relative w-full overflow-auto bg-gray-900 rounded-lg border border-gray-600 h-[60vh] md:h-[80vh]">
-            <canvas id="canvas-sign" class="mx-auto"></canvas>
-        </div>
-
+            <div id="canvas-container-sign"><canvas id="canvas-sign"></canvas></div>
+        </section>
     </div>
-    <button id="process-btn" class="hidden btn-gradient w-full mt-6">Apply Signatures & Download PDF</button>
+    <button id="process-btn" class="hidden btn-gradient" type="button">Add marks & download signed PDF</button>
 `,
 
     'remove-annotations': () => `
