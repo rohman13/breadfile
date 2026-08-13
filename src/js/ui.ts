@@ -4,6 +4,8 @@ import { tesseractLanguages } from './config/tesseract-languages.js';
 import { icons, createIcons } from "lucide";
 import Sortable from 'sortablejs';
 import * as pdfjsLib from 'pdfjs-dist';
+import { alertService } from './ui/alert.js';
+import { progressService } from './ui/progress.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url
@@ -29,20 +31,13 @@ export const dom = {
     hideSections: document.querySelectorAll('.hide-section'),
 };
 
-export const showLoader = (text = 'Processing...') => {
-    dom.loaderText.textContent = text;
-    dom.loaderModal.classList.remove('hidden');
-};
+export const showLoader = (text = 'Processing...') => progressService.show(text);
 
-export const hideLoader = () => dom.loaderModal.classList.add('hidden');
+export const hideLoader = () => progressService.hide();
 
-export const showAlert = (title: any, message: any) => {
-    dom.alertTitle.textContent = title;
-    dom.alertMessage.textContent = message;
-    dom.alertModal.classList.remove('hidden');
-};
+export const showAlert = (title: string, message: string) => alertService.show(title, message);
 
-export const hideAlert = () => dom.alertModal.classList.add('hidden');
+export const hideAlert = () => alertService.hide();
 
 export const switchView = (view: any) => {
     if (view === 'grid') {

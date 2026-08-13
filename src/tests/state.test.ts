@@ -44,17 +44,13 @@ describe('State Management', () => {
       expect(state.currentPdfUrl).toBeNull();
     });
 
-    it('should clear the innerHTML of the #tool-content element', () => {
+    it('should leave view cleanup to the application shell', () => {
       const toolContentElement = document.getElementById('tool-content');
-
-      // Sanity check: ensure the content exists before resetting
       expect(toolContentElement?.innerHTML).toBe('Some old tool content');
 
-      // Call the function to test
       resetState();
 
-      // Assert that the element's content has been cleared
-      expect(toolContentElement?.innerHTML).toBe('');
+      expect(toolContentElement?.innerHTML).toBe('Some old tool content');
     });
   });
 });
