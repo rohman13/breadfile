@@ -28,7 +28,7 @@ async function handleSinglePdfUpload(toolId, file) {
         }
 
         const optionsDiv = document.querySelector('[id$="-options"], [id$="-preview"], [id$="-organizer"], [id$="-rotator"], [id$="-editor"]');
-        if (optionsDiv) optionsDiv.classList.remove('hidden');
+        if (optionsDiv && toolId !== 'sign-pdf') optionsDiv.classList.remove('hidden');
 
         const processBtn = document.getElementById('process-btn');
         if (processBtn) {
@@ -241,7 +241,7 @@ async function handleSinglePdfUpload(toolId, file) {
         }
 
         if (toolLogic[toolId] && typeof toolLogic[toolId].setup === 'function') {
-            toolLogic[toolId].setup();
+            await toolLogic[toolId].setup();
         }
     } catch (e) {
         hideLoader();

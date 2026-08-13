@@ -56,6 +56,8 @@ export const formatBytes = (bytes: any, decimals = 1) => {
 };
 
 export const downloadFile = (blob: any, filename: any) => {
+    const requestedName = (document.getElementById('paper-output-name') as HTMLInputElement | null)?.value.trim();
+    if (requestedName) filename = requestedName;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -63,6 +65,7 @@ export const downloadFile = (blob: any, filename: any) => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    window.dispatchEvent(new CustomEvent('breadfile:download', { detail: { filename, size: blob.size } }));
     // Firefox may not have started reading the object URL when click() returns.
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 };

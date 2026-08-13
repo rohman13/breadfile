@@ -3,18 +3,22 @@ import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile } from '../utils/helpers.js';
 import { state } from '../state.js';
 
-import { PDFDocument as PDFLibDocument } from 'pdf-lib';
+import { degrees, PDFDocument as PDFLibDocument } from 'pdf-lib';
 
 export async function organize() {
     showLoader('Saving changes...');
     try {
         const newPdf = await PDFLibDocument.create();
         const pageContainer = document.getElementById('page-organizer');
-        // @ts-expect-error TS(2339) FIXME: Property 'dataset' does not exist on type 'Element... Remove this comment to see the full error message
-        const pageIndices = Array.from(pageContainer.children).map(child => parseInt(child.dataset.pageIndex));
+        const pageElements = Array.from(pageContainer.children) as HTMLElement[];
+        const pageIndices = pageElements.map(child => parseInt(child.dataset.pageIndex!));
 
         const copiedPages = await newPdf.copyPages(state.pdfDoc, pageIndices);
-        copiedPages.forEach((page: any) => newPdf.addPage(page));
+        copiedPages.forEach((page: any, index: number) => {
+            const turn = parseInt(pageElements[index].dataset.rotation || '0');
+            if (turn) page.setRotation(degrees(page.getRotation().angle + turn));
+            newPdf.addPage(page);
+        });
 
         const newPdfBytes = await newPdf.save();
         downloadFile(new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }), 'organized.pdf');

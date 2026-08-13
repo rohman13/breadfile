@@ -11,6 +11,7 @@ function required<T extends HTMLElement>(id: string): T {
 
 export class AppShell {
   private activeTool: ToolModule | null = null;
+  private paperDeskDispose: (() => void) | null = null;
   private transition = 0;
 
   constructor(private readonly services: AppServices) {}
@@ -39,9 +40,19 @@ export class AppShell {
       const subtitle = document.createElement('p');
       subtitle.className = 'text-xs text-gray-400 mt-1 px-2';
       subtitle.textContent = tool.subtitle;
-      card.append(icon, name, subtitle);
+      const accessory = document.createElement('span');
+      accessory.className = 'tool-card__accessory';
+      accessory.dataset.art = tool.id;
+      accessory.setAttribute('aria-hidden', 'true');
+      card.append(icon, accessory, name, subtitle);
       tools.append(card);
     });
+
+    const note = document.createElement('aside');
+    note.className = 'workshop-note';
+    note.setAttribute('aria-label', 'A note from the BreadFile workshop');
+    note.innerHTML = '<span class="workshop-note__pencil" aria-hidden="true"><i></i></span><div><small>From the workbench</small><strong>More tiny tools are being sharpened.</strong></div>';
+    tools.append(note);
 
     group.append(tools);
     grid.append(group);
@@ -56,7 +67,16 @@ export class AppShell {
       if (card?.dataset.toolId) void this.openTool(card.dataset.toolId);
     });
     required<HTMLButtonElement>('back-to-grid').addEventListener('click', () => void this.showGrid());
+    document.querySelector<HTMLAnchorElement>('.bread-cta[href="#tools-header"]')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      this.scrollToTools('smooth');
+    });
     this.setupSearch();
+  }
+
+  private scrollToTools(behavior: ScrollBehavior = 'smooth'): void {
+    required<HTMLElement>('tools-header').scrollIntoView({ behavior, block: 'start' });
+    if (location.hash !== '#tools-header') history.replaceState(history.state, '', '#tools-header');
   }
 
   private setupSearch(): void {
@@ -90,6 +110,8 @@ export class AppShell {
       }
       this.activeTool = tool;
       await tool.mount({ container, services: this.services });
+      const { mountPaperDesk } = await import('../ui/paper-desk.js');
+      this.paperDeskDispose = mountPaperDesk(definition.id, container);
       if (currentTransition !== this.transition) {
         await tool.dispose();
         if (this.activeTool === tool) this.activeTool = null;
@@ -110,9 +132,16 @@ export class AppShell {
     resetState();
     required<HTMLElement>('tool-content').replaceChildren();
     this.setToolView(false);
+    // The tools section was hidden while a tool was open. Wait until layout is
+    // restored before calculating its scroll position.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => this.scrollToTools('instant' as ScrollBehavior));
+    });
   }
 
   private async disposeActiveTool(): Promise<void> {
+    this.paperDeskDispose?.();
+    this.paperDeskDispose = null;
     const tool = this.activeTool;
     this.activeTool = null;
     if (tool) await tool.dispose();
@@ -121,7 +150,8 @@ export class AppShell {
   private setToolView(showTool: boolean): void {
     required<HTMLElement>('grid-view').classList.toggle('hidden', showTool);
     required<HTMLElement>('tool-interface').classList.toggle('hidden', !showTool);
-    ['hero-section', 'features-section', 'tools-header'].forEach((id) => {
+    required<HTMLElement>('tools-header').classList.toggle('hidden', showTool);
+    ['hero-section', 'features-section', 'tool-station'].forEach((id) => {
       required<HTMLElement>(id).classList.toggle('hidden', showTool);
     });
     document.querySelectorAll<HTMLElement>('.section-divider, .hide-section').forEach((element) => {

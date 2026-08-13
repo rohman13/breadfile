@@ -19,7 +19,9 @@ let visualSelectorRendered = false;
 async function renderVisualSelector() {
     const container = document.getElementById('page-selector-grid');
     if (!container) return;
-    if (visualSelectorRendered && container.childElementCount > 0) return;
+    // Rendering is async. A second setup/change callback can arrive before the
+    // first thumbnail is appended, so the flag alone must guard re-entry.
+    if (visualSelectorRendered) return;
 
     visualSelectorRendered = true;
 
@@ -81,7 +83,7 @@ async function renderVisualSelector() {
 
 
 export function setupSplitTool() {
-    const splitModeSelect = document.getElementById('split-mode');
+    const splitModeSelect = document.getElementById('split-mode') as HTMLSelectElement | null;
     const rangePanel = document.getElementById('range-panel');
     const visualPanel = document.getElementById('visual-select-panel');
     const evenOddPanel = document.getElementById('even-odd-panel');
@@ -90,9 +92,8 @@ export function setupSplitTool() {
 
     if (!splitModeSelect) return;
 
-    splitModeSelect.addEventListener('change', (e) => {
-        // @ts-expect-error TS(2339) FIXME: Property 'value' does not exist on type 'EventTarg... Remove this comment to see the full error message
-        const mode = e.target.value;
+    const applyMode = () => {
+        const mode = splitModeSelect.value;
                 
         if (mode !== 'visual') {
             visualSelectorRendered = false;
@@ -112,13 +113,22 @@ export function setupSplitTool() {
         } else if (mode === 'visual') {
             visualPanel.classList.remove('hidden');
             zipOptionWrapper.classList.remove('hidden');
-            renderVisualSelector();
+            if (state.pdfDoc) void renderVisualSelector();
         } else if (mode === 'even-odd') {
             evenOddPanel.classList.remove('hidden');
         } else if (mode === 'all') {
             allPagesPanel.classList.remove('hidden');
         }
-    });
+    };
+
+    // setupSplitTool is called both when the view mounts and after the PDF is
+    // loaded. Bind once, but apply the current/default mode on every call.
+    if (!splitModeSelect.dataset.splitSetup) {
+        splitModeSelect.dataset.splitSetup = 'true';
+        visualSelectorRendered = false;
+        splitModeSelect.addEventListener('change', applyMode);
+    }
+    applyMode();
 }
 
 
@@ -132,7 +142,7 @@ export async function split() {
 
     try {
         const totalPages = state.pdfDoc.getPageCount();
-        let indicesToExtract: any = [];
+        let indicesToExtract: number[] = [];
         
         switch (splitMode) {
             case 'range':
@@ -158,13 +168,20 @@ export async function split() {
                 indicesToExtract = Array.from({ length: totalPages }, (_, i) => i);
                 break;
             case 'visual':
-                indicesToExtract = Array.from(document.querySelectorAll('.page-thumbnail-wrapper.selected'))
-                                         // @ts-expect-error TS(2339) FIXME: Property 'dataset' does not exist on type 'Element... Remove this comment to see the full error message
-                                         .map(el => parseInt(el.dataset.pageIndex));
+                indicesToExtract = Array.from(document.querySelectorAll<HTMLElement>('#page-selector-grid > .page-thumbnail-wrapper.selected'))
+                    .map((element) => Number(element.dataset.pageIndex));
                 break;
         }
-                
-        const uniqueIndices = [...new Set(indicesToExtract)];
+
+        // Never pass stale, malformed, one-past-the-end, or duplicate DOM
+        // indices into pdf-lib. Invalid indices otherwise surface as the
+        // cryptic "Cannot read properties of undefined (reading 'node')".
+        let uniqueIndices = [...new Set(indicesToExtract)]
+            .filter((index): index is number => Number.isInteger(index) && index >= 0 && index < totalPages)
+            .sort((a, b) => a - b);
+        if (splitMode === 'visual' && uniqueIndices.length === totalPages) {
+            uniqueIndices = Array.from({ length: totalPages }, (_, index) => index);
+        }
         if (uniqueIndices.length === 0) {
             throw new Error('No pages were selected for splitting.');
         }
@@ -174,17 +191,17 @@ export async function split() {
             const zip = new JSZip();
             for (const index of uniqueIndices) {
                 const newPdf = await PDFLibDocument.create();
-                const [copiedPage] = await newPdf.copyPages(state.pdfDoc, [index as number]);
+                const [copiedPage] = await newPdf.copyPages(state.pdfDoc, [index]);
+                if (!copiedPage) throw new Error(`Page ${index + 1} could not be copied.`);
                 newPdf.addPage(copiedPage);
                 const pdfBytes = await newPdf.save();
-                // @ts-expect-error TS(2365) FIXME: Operator '+' cannot be applied to types 'unknown' ... Remove this comment to see the full error message
                 zip.file(`page-${index + 1}.pdf`, pdfBytes);
             }
             const zipBlob = await zip.generateAsync({ type: 'blob' });
             downloadFile(zipBlob, 'split-pages.zip');
         } else {
             const newPdf = await PDFLibDocument.create();
-            const copiedPages = await newPdf.copyPages(state.pdfDoc, uniqueIndices as number[]);
+            const copiedPages = await newPdf.copyPages(state.pdfDoc, uniqueIndices);
             copiedPages.forEach((page: any) => newPdf.addPage(page));
             const pdfBytes = await newPdf.save();
             downloadFile(new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' }), 'split-document.pdf');

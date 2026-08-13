@@ -316,13 +316,13 @@ export const toolTemplates = {
         
         <label for="split-mode" class="block mb-2 text-sm font-medium text-gray-300">Split Mode</label>
         <select id="split-mode" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-2.5 mb-4">
+            <option value="visual" selected>Choose pages visually</option>
             <option value="range">Split by page ranges</option>
             <option value="even-odd">Keep odd or even pages</option>
             <option value="all">One file per page</option>
-            <option value="visual">Choose pages visually</option>
         </select>
 
-        <div id="range-panel">
+        <div id="range-panel" class="hidden">
             <div class="p-3 bg-gray-900 rounded-lg border border-gray-700 mb-3">
                 <p class="text-sm text-gray-300"><strong class="text-white">How it works:</strong></p>
                 <ul class="list-disc list-inside text-xs text-gray-400 mt-1 space-y-1">
@@ -353,7 +353,7 @@ export const toolTemplates = {
             </div>
         </div>
         
-        <div id="visual-select-panel" class="hidden">
+        <div id="visual-select-panel">
              <div class="p-3 bg-gray-900 rounded-lg border border-gray-700 mb-3">
                 <p class="text-sm text-gray-300"><strong class="text-white">How it works:</strong></p>
                 <p class="text-xs text-gray-400 mt-1">Click on the page thumbnails below to select them. Click again to deselect. All selected pages will be extracted.</p>
@@ -366,7 +366,7 @@ export const toolTemplates = {
             <p class="text-xs text-gray-400 mt-1">This mode will create a separate PDF file for every single page in your document and download them together in one ZIP archive.</p>
         </div>
         
-        <div id="zip-option-wrapper" class="hidden mt-4">
+        <div id="zip-option-wrapper" class="mt-4">
             <label class="flex items-center gap-2 text-sm font-medium text-gray-300">
                 <input type="checkbox" id="download-as-zip" class="w-4 h-4 rounded text-indigo-600 bg-gray-700 border-gray-600 focus:ring-indigo-500">
                 Download pages as individual files in a ZIP
@@ -1485,8 +1485,9 @@ compress: () => `
             <div class="signature-step"><span>1</span><div><strong id="signature-maker-title">Make or upload your mark</strong><small>Nothing is uploaded or stored after you leave.</small></div></div>
             <div class="signature-tabs" role="tablist" aria-label="Signature source">
                 <button id="draw-tab-btn" class="is-active" type="button">Draw</button>
-                <button id="type-tab-btn" type="button">Type</button>
-                <button id="upload-tab-btn" type="button">Upload stamp</button>
+                <button id="handwritten-tab-btn" type="button">Handwritten</button>
+                <button id="script-tab-btn" type="button">Script</button>
+                <button id="upload-tab-btn" type="button">Upload</button>
             </div>
             
             <div id="draw-panel">
@@ -1497,14 +1498,18 @@ compress: () => `
                 </div>
             </div>
 
-            <div id="type-panel" class="hidden">
-                <label class="signature-field">Your name<input type="text" id="signature-text-input" placeholder="Type your name"></label>
-                <div class="signature-field-grid">
-                    <label class="signature-field">Style<select id="font-family-select"><option value="'Great Vibes', cursive">Signature</option><option value="'Kalam', cursive">Handwritten</option><option value="'Dancing Script', cursive">Script</option><option value="Georgia, serif">Formal</option></select></label>
-                    <label class="signature-field">Ink<input type="color" id="font-color-picker" value="#384d59"></label>
-                </div>
-                <div id="font-preview" class="signature-type-preview">Your name</div>
-                <button id="save-type-btn" class="signature-primary" type="button">Use this typed signature</button>
+            <div id="handwritten-panel" class="hidden signature-type-panel">
+                <label class="signature-field">Your name<input type="text" id="handwritten-text-input" placeholder="Type your name"></label>
+                <label class="signature-field signature-ink-field">Ink<input type="color" id="handwritten-color" value="#384d59"></label>
+                <div id="handwritten-preview" class="signature-type-preview signature-type-preview--handwritten">Your name</div>
+                <button id="save-handwritten-btn" class="signature-primary" type="button">Use handwritten style</button>
+            </div>
+
+            <div id="script-panel" class="hidden signature-type-panel">
+                <label class="signature-field">Your name<input type="text" id="script-text-input" placeholder="Type your name"></label>
+                <label class="signature-field signature-ink-field">Ink<input type="color" id="script-color" value="#384d59"></label>
+                <div id="script-preview" class="signature-type-preview signature-type-preview--script">Your name</div>
+                <button id="save-script-btn" class="signature-primary" type="button">Use script style</button>
             </div>
 
             <div id="upload-panel" class="hidden">
@@ -1522,7 +1527,7 @@ compress: () => `
                 <div><button id="prev-page-sign" type="button" aria-label="Previous page"><i data-lucide="chevron-left"></i></button><span>Page <strong id="current-page-display-sign">1</strong> of <strong id="total-pages-display-sign">1</strong></span><button id="next-page-sign" type="button" aria-label="Next page"><i data-lucide="chevron-right"></i></button></div>
                 <div><button id="zoom-out-btn" type="button" aria-label="Zoom out"><i data-lucide="zoom-out"></i></button><button id="fit-width-btn" type="button" aria-label="Fit width"><i data-lucide="scan"></i></button><button id="zoom-in-btn" type="button" aria-label="Zoom in"><i data-lucide="zoom-in"></i></button><button id="undo-btn" type="button" aria-label="Undo last placement"><i data-lucide="undo-2"></i></button><button id="delete-signature-btn" type="button" aria-label="Delete selected signature" disabled><i data-lucide="trash-2"></i></button></div>
             </div>
-            <div id="canvas-container-sign"><canvas id="canvas-sign"></canvas></div>
+            <div id="canvas-container-sign"><div id="signature-page-stage"><canvas id="canvas-sign"></canvas><div id="signature-object-layer" aria-label="Placed signatures and stamps"></div></div></div>
         </section>
     </div>
     <button id="process-btn" class="hidden btn-gradient" type="button">Add marks & download signed PDF</button>

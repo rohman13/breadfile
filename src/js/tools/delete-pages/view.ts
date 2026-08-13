@@ -21,10 +21,12 @@ export function createDeletePagesView(): DeletePagesView {
 
   const { root: dropzone, input: fileInput } = createDropzone();
   const fileSummary = document.createElement('div');
+  fileSummary.id = 'file-display-area';
   fileSummary.className = 'mt-4 space-y-2';
   fileSummary.setAttribute('aria-live', 'polite');
 
   const options = document.createElement('div');
+  options.id = 'delete-options';
   options.className = 'hidden mt-6';
 
   const totalLine = document.createElement('p');

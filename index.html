@@ -41,7 +41,8 @@
           <span class="paper__face">•ᴗ•</span>
           <span class="paper__line"></span><span class="paper__line paper__line--short"></span>
         </div>
-        <span class="spark spark--one">✦</span><span class="spark spark--two">✦</span>
+        <span class="hero-clip hero-clip--one"></span>
+        <span class="hero-pencil"><i></i></span>
       </div>
     </section>
 
@@ -51,20 +52,23 @@
       <div><i data-lucide="tablet"></i><span><strong>Tablet ready</strong><small>Made for fingers too</small></span></div>
     </section>
 
-    <div class="section-divider"></div>
+    <div class="workshop-divider hide-section" aria-hidden="true"><span></span><i></i><span></span></div>
 
-    <section id="tools-header" class="bread-tools-heading">
-      <span class="bread-kicker">Choose your next move</span>
-      <h2>What should we do with your PDF?</h2>
-    </section>
+    <div id="tool-station" class="bread-tool-station">
+      <section id="tools-header" class="bread-tools-heading">
+        <span class="bread-kicker">Choose your next move</span>
+        <h2>What should we do with your PDF?</h2>
+        <p>Pick a little helper for the job.</p>
+      </section>
 
-    <section id="grid-view" class="bread-tools-area">
-      <label class="bread-search" for="search-bar">
-        <i data-lucide="search" aria-hidden="true"></i>
-        <input id="search-bar" type="search" placeholder="Find a tool" autocomplete="off" />
-      </label>
-      <div id="tool-grid" class="bread-tool-grid"></div>
-    </section>
+      <section id="grid-view" class="bread-tools-area">
+        <label class="bread-search" for="search-bar">
+          <i data-lucide="search" aria-hidden="true"></i>
+          <input id="search-bar" type="search" placeholder="Find a tool" autocomplete="off" />
+        </label>
+        <div id="tool-grid" class="bread-tool-grid"></div>
+      </section>
+    </div>
 
     <section id="tool-interface" class="hidden bread-workbench" aria-live="polite">
       <button id="back-to-grid" class="bread-back" type="button">
@@ -100,7 +104,12 @@
     </div>
 
     <section class="bread-how hide-section">
-      <div class="bread-how__art" aria-hidden="true"><span>PDF</span><i data-lucide="sparkles"></i></div>
+      <div class="bread-how__art" aria-hidden="true">
+        <div class="safe-drawer"><span class="safe-drawer__slot"></span><span class="safe-drawer__handle"></span><i data-lucide="lock-keyhole"></i></div>
+        <span class="safe-paper safe-paper--back"></span>
+        <span class="safe-paper safe-paper--front"><i></i><b></b></span>
+        <span class="safe-caption">STAYS HERE</span>
+      </div>
       <div>
         <span class="bread-kicker">Private by default</span>
         <h2>Your file never takes a trip.</h2>
