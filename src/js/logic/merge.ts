@@ -1,0 +1,433 @@
+import { showLoader, hideLoader, showAlert } from '../ui.ts';
+import { downloadFile, readFileAsArrayBuffer } from '../utils/helpers.ts';
+import { state } from '../state.ts';
+
+import { PDFDocument as PDFLibDocument } from 'pdf-lib';
+import * as pdfjsLib from 'pdfjs-dist';
+import Sortable from 'sortablejs';
+import { normalizePageSelection } from '../utils/pageSelection.js';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+).toString();
+
+const mergeState = {
+    pdfDocs: {},
+    activeMode: 'file',
+    sortableInstances: {},
+    isRendering: false,
+    cachedThumbnails: null,
+    lastFileHash: null
+};
+
+const fileIds = new WeakMap<File, string>();
+let nextFileId = 1;
+
+function getFileId(file: File) {
+    let id = fileIds.get(file);
+    if (!id) {
+        id = `pdf-${nextFileId++}`;
+        fileIds.set(file, id);
+    }
+    return id;
+}
+
+function getDisplayName(file: File) {
+    const matchingFiles = (state.files as File[]).filter(candidate => candidate.name === file.name);
+    if (matchingFiles.length < 2) return file.name;
+    return `${file.name} (${matchingFiles.indexOf(file) + 1})`;
+}
+
+function parsePageRanges(rangeString: any, totalPages: any) {
+    const indices = new Set();
+    if (!rangeString.trim()) return [];
+
+    const ranges = rangeString.split(',');
+    for (const range of ranges) {
+        const trimmedRange = range.trim();
+        if (trimmedRange.includes('-')) {
+            const [start, end] = trimmedRange.split('-').map(Number);
+            if (isNaN(start) || isNaN(end) || start < 1 || end > totalPages || start > end) continue;
+            for (let i = start; i <= end; i++) {
+                indices.add(i - 1);
+            }
+        } else {
+            const pageNum = Number(trimmedRange);
+            if (isNaN(pageNum) || pageNum < 1 || pageNum > totalPages) continue;
+            indices.add(pageNum - 1);
+        }
+    }
+    // @ts-expect-error TS(2362) FIXME: The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
+    return Array.from(indices).sort((a, b) => a - b);
+}
+
+function initializeFileListSortable() {
+    const fileList = document.getElementById('file-list');
+    if (!fileList) return;
+
+    // @ts-expect-error TS(2339) FIXME: Property 'fileList' does not exist on type '{}'.
+    if (mergeState.sortableInstances.fileList) {
+        // @ts-expect-error TS(2339) FIXME: Property 'fileList' does not exist on type '{}'.
+        mergeState.sortableInstances.fileList.destroy();
+    }
+
+    // @ts-expect-error TS(2339) FIXME: Property 'fileList' does not exist on type '{}'.
+    mergeState.sortableInstances.fileList = Sortable.create(fileList, {
+        handle: '.drag-handle',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        onStart: function (evt: any) {
+            evt.item.style.opacity = '0.5';
+        },
+        onEnd: function (evt: any) {
+            evt.item.style.opacity = '1';
+        }
+    });
+}
+
+function initializePageThumbnailsSortable() {
+    const container = document.getElementById('page-merge-preview');
+    if (!container) return;
+
+    // @ts-expect-error TS(2339) FIXME: Property 'pageThumbnails' does not exist on type '... Remove this comment to see the full error message
+    if (mergeState.sortableInstances.pageThumbnails) {
+        // @ts-expect-error TS(2339) FIXME: Property 'pageThumbnails' does not exist on type '... Remove this comment to see the full error message
+        mergeState.sortableInstances.pageThumbnails.destroy();
+    }
+
+    // @ts-expect-error TS(2339) FIXME: Property 'pageThumbnails' does not exist on type '... Remove this comment to see the full error message
+    mergeState.sortableInstances.pageThumbnails = Sortable.create(container, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        onStart: function (evt: any) {
+            evt.item.style.opacity = '0.5';
+        },
+        onEnd: function (evt: any) {
+            evt.item.style.opacity = '1';
+        }
+    });
+}
+
+function generateFileHash() {
+    return (state.files as File[]).map(f => `${getFileId(f)}-${f.size}-${f.lastModified}`).join('|');
+}
+
+async function renderPageMergeThumbnails() {
+    const container = document.getElementById('page-merge-preview');
+    if (!container) return;
+
+    const currentFileHash = generateFileHash();
+    const filesChanged = currentFileHash !== mergeState.lastFileHash;
+
+        if (!filesChanged && mergeState.cachedThumbnails !== null) {
+        // Simple check to see if it's already rendered to avoid flicker.
+        if (container.firstChild) {
+             initializePageThumbnailsSortable();
+             return;
+        }
+    }
+
+    if (mergeState.isRendering) {
+        return;
+    }
+
+    mergeState.isRendering = true;
+    container.textContent = '';
+
+    let currentPageNumber = 0;
+    let totalPages = state.files.reduce((sum, file) => {
+        const pdfDoc = mergeState.pdfDocs[getFileId(file)];
+        return sum + (pdfDoc ? pdfDoc.getPageCount() : 0);
+    }, 0);
+
+    try {
+        const thumbnailsHTML = [];
+
+        for (const file of state.files) {
+            const fileId = getFileId(file);
+            const pdfDoc = mergeState.pdfDocs[fileId];
+            if (!pdfDoc) throw new Error(`PDF was not loaded: ${file.name}`);
+
+            const pdfData = await pdfDoc.save();
+            const pdfjsDoc = await pdfjsLib.getDocument({ data: pdfData }).promise;
+
+            for (let i = 1; i <= pdfjsDoc.numPages; i++) {
+                currentPageNumber++;
+                showLoader(`Rendering page previews: ${currentPageNumber}/${totalPages}`);
+                const page = await pdfjsDoc.getPage(i);
+                const viewport = page.getViewport({ scale: 0.3 });
+                const canvas = document.createElement('canvas');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                const context = canvas.getContext('2d')!;
+                await page.render({
+                    canvasContext: context,
+                    canvas: canvas,
+                    viewport
+                }).promise;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'page-thumbnail relative cursor-move flex flex-col items-center gap-1 p-2 border-2 border-gray-600 hover:border-indigo-500 rounded-lg bg-gray-700 transition-colors';
+                wrapper.dataset.fileId = fileId;
+                wrapper.dataset.pageIndex = (i - 1).toString();
+
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'relative';
+
+                const img = document.createElement('img');
+                img.src = canvas.toDataURL();
+                img.className = 'rounded-md shadow-md max-w-full h-auto';
+
+                const pageNumDiv = document.createElement('div');
+                pageNumDiv.className = 'absolute top-1 left-1 bg-indigo-600 text-white text-xs px-2 py-1 rounded-md font-semibold shadow-lg';
+                pageNumDiv.textContent = i.toString();
+
+                imgContainer.append(img, pageNumDiv);
+
+                const fileNamePara = document.createElement('p');
+                fileNamePara.className = 'text-xs text-gray-400 truncate w-full text-center';
+                const displayName = getDisplayName(file);
+                const fullTitle = `${displayName} (page ${i})`;
+                fileNamePara.title = fullTitle;
+                fileNamePara.textContent = `${displayName.substring(0, 14)}${displayName.length > 14 ? '…' : ''} (p${i})`;
+
+                wrapper.append(imgContainer, fileNamePara);
+                container.appendChild(wrapper);
+            }
+
+            pdfjsDoc.destroy();
+        }
+
+        mergeState.cachedThumbnails = true;
+        mergeState.lastFileHash = currentFileHash;
+
+        initializePageThumbnailsSortable();
+    } catch (error) {
+        console.error('Error rendering page thumbnails:', error);
+        showAlert('Error', 'Failed to render page thumbnails');
+    } finally {
+        hideLoader();
+        mergeState.isRendering = false;
+    }
+}
+
+export async function merge() {
+    if ((state.files as File[]).length < 2) {
+        showAlert('Add another PDF', 'Choose at least two PDF files to merge.');
+        return;
+    }
+    showLoader('Merging PDFs...');
+    try {
+        const newPdfDoc = await PDFLibDocument.create();
+
+        if (mergeState.activeMode === 'file') {
+            const fileList = document.getElementById('file-list');
+            const sortedFiles = Array.from(fileList.children).map(li => {
+                // @ts-expect-error TS(2339) FIXME: Property 'dataset' does not exist on type 'Element... Remove this comment to see the full error message
+                return (state.files as File[]).find(f => getFileId(f) === li.dataset.fileId);
+            }).filter(Boolean);
+
+            for (const file of sortedFiles) {
+                const fileId = getFileId(file);
+                const rangeInput = document.getElementById(`range-${fileId}`);
+                if (!rangeInput) throw new Error(`Missing page range for ${file.name}`);
+
+                // @ts-expect-error TS(2339) FIXME: Property 'value' does not exist on type 'HTMLEleme... Remove this comment to see the full error message
+                const rangeInputValue = rangeInput.value;
+                const sourcePdf = mergeState.pdfDocs[fileId];
+                if (!sourcePdf) throw new Error(`PDF was not loaded: ${file.name}`);
+
+                const totalPages = sourcePdf.getPageCount();
+                const parsed = rangeInputValue.trim()
+                    ? normalizePageSelection(rangeInputValue, totalPages)
+                    : sourcePdf.getPageIndices();
+                if (!Array.isArray(parsed)) {
+                    showAlert(`Check pages for ${file.name}`, parsed.error);
+                    return;
+                }
+
+                const copiedPages = await newPdfDoc.copyPages(sourcePdf, parsed);
+                copiedPages.forEach((page: any) => newPdfDoc.addPage(page));
+            }
+
+        } else {
+            const pageContainer = document.getElementById('page-merge-preview');
+            const pageElements = Array.from(pageContainer.children);
+
+            for (const el of pageElements) {
+                // @ts-expect-error TS(2339) FIXME: Property 'dataset' does not exist on type 'Element... Remove this comment to see the full error message
+                const fileId = el.dataset.fileId;
+                // @ts-expect-error TS(2339) FIXME: Property 'dataset' does not exist on type 'Element... Remove this comment to see the full error message
+                const pageIndex = parseInt(el.dataset.pageIndex, 10);
+
+                const sourcePdf = mergeState.pdfDocs[fileId];
+                if (!sourcePdf || isNaN(pageIndex) || pageIndex < 0 || pageIndex >= sourcePdf.getPageCount()) {
+                    throw new Error('A page in the merge preview is invalid.');
+                }
+                const [copiedPage] = await newPdfDoc.copyPages(sourcePdf, [pageIndex]);
+                newPdfDoc.addPage(copiedPage);
+            }
+        }
+
+        if (newPdfDoc.getPageCount() === 0) {
+            showAlert('Nothing to merge', 'Keep at least one page in the output.');
+            return;
+        }
+
+        const mergedPdfBytes = await newPdfDoc.save();
+        downloadFile(new Blob([new Uint8Array(mergedPdfBytes)], { type: 'application/pdf' }), 'merged.pdf');
+        showAlert('Success', 'PDFs merged successfully!');
+
+    } catch (e) {
+        console.error('Merge error:', e);
+        showAlert('Error', 'Failed to merge PDFs. Please check that all files are valid and not password-protected.');
+    } finally {
+        hideLoader();
+    }
+}
+
+export async function setupMergeTool() {
+    document.getElementById('merge-options').classList.remove('hidden');
+    // @ts-expect-error TS(2339) FIXME: Property 'disabled' does not exist on type 'HTMLEl... Remove this comment to see the full error message
+    document.getElementById('process-btn').disabled = false;
+
+    const wasInPageMode = mergeState.activeMode === 'page';
+
+    showLoader('Loading PDF documents...');
+    try {
+        for (const file of state.files) {
+            const fileId = getFileId(file);
+            if (!mergeState.pdfDocs[fileId]) {
+                const pdfBytes = await readFileAsArrayBuffer(file);
+                mergeState.pdfDocs[fileId] = await PDFLibDocument.load(pdfBytes as ArrayBuffer, {
+                    ignoreEncryption: true
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading PDFs:', error);
+        showAlert('Error', 'Failed to load one or more PDF files');
+        return;
+    } finally {
+        hideLoader();
+    }
+
+    const fileModeBtn = document.getElementById('file-mode-btn');
+    const pageModeBtn = document.getElementById('page-mode-btn');
+    const filePanel = document.getElementById('file-mode-panel');
+    const pagePanel = document.getElementById('page-mode-panel');
+    const fileList = document.getElementById('file-list');
+
+   fileList.textContent = ''; // Clear list safely
+    (state.files as File[]).forEach(f => {
+        const fileId = getFileId(f);
+        const doc = mergeState.pdfDocs[fileId];
+        const pageCount = doc ? doc.getPageCount() : 'N/A';
+
+        const li = document.createElement('li');
+        li.className = 'bg-gray-700 p-3 rounded-lg border border-gray-600 hover:border-indigo-500 transition-colors';
+        li.dataset.fileId = fileId;
+
+        const mainDiv = document.createElement('div');
+        mainDiv.className = 'flex items-center justify-between';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'truncate font-medium text-white flex-1 mr-2';
+        nameSpan.title = getDisplayName(f);
+        nameSpan.textContent = getDisplayName(f);
+
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'drag-handle cursor-move text-gray-400 hover:text-white p-1 rounded transition-colors';
+        dragHandle.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>`; // Safe: static content
+
+        mainDiv.append(nameSpan, dragHandle);
+
+        const rangeDiv = document.createElement('div');
+        rangeDiv.className = 'mt-2';
+
+        const label = document.createElement('label');
+        label.htmlFor = `range-${fileId}`;
+        label.className = 'text-xs text-gray-400';
+        label.textContent = `Pages (e.g., 1-3, 5) - Total: ${pageCount}`;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `range-${fileId}`;
+        input.className = 'w-full bg-gray-800 border border-gray-600 text-white rounded-md p-2 text-sm mt-1 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors';
+        input.placeholder = 'Leave blank for all pages';
+
+        rangeDiv.append(label, input);
+        li.append(mainDiv, rangeDiv);
+        fileList.appendChild(li);
+    });
+
+    initializeFileListSortable();
+
+    const newFileModeBtn = fileModeBtn.cloneNode(true);
+    const newPageModeBtn = pageModeBtn.cloneNode(true);
+    fileModeBtn.replaceWith(newFileModeBtn);
+    pageModeBtn.replaceWith(newPageModeBtn);
+
+    newFileModeBtn.addEventListener('click', () => {
+        if (mergeState.activeMode === 'file') return;
+
+        mergeState.activeMode = 'file';
+        filePanel.classList.remove('hidden');
+        pagePanel.classList.add('hidden');
+
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newFileModeBtn.classList.add('bg-indigo-600', 'text-white');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newFileModeBtn.classList.remove('bg-gray-700', 'text-gray-300');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newPageModeBtn.classList.remove('bg-indigo-600', 'text-white');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newPageModeBtn.classList.add('bg-gray-700', 'text-gray-300');
+    });
+
+    newPageModeBtn.addEventListener('click', async () => {
+        if (mergeState.activeMode === 'page') return;
+
+        mergeState.activeMode = 'page';
+        filePanel.classList.add('hidden');
+        pagePanel.classList.remove('hidden');
+
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newPageModeBtn.classList.add('bg-indigo-600', 'text-white');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newPageModeBtn.classList.remove('bg-gray-700', 'text-gray-300');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newFileModeBtn.classList.remove('bg-indigo-600', 'text-white');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newFileModeBtn.classList.add('bg-gray-700', 'text-gray-300');
+
+        await renderPageMergeThumbnails();
+    });
+
+    if (wasInPageMode) {
+        mergeState.activeMode = 'page';
+        filePanel.classList.add('hidden');
+        pagePanel.classList.remove('hidden');
+
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newPageModeBtn.classList.add('bg-indigo-600', 'text-white');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newPageModeBtn.classList.remove('bg-gray-700', 'text-gray-300');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newFileModeBtn.classList.remove('bg-indigo-600', 'text-white');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newFileModeBtn.classList.add('bg-gray-700', 'text-gray-300');
+
+        await renderPageMergeThumbnails();
+    } else {
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newFileModeBtn.classList.add('bg-indigo-600', 'text-white');
+        // @ts-expect-error TS(2339) FIXME: Property 'classList' does not exist on type 'Node'... Remove this comment to see the full error message
+        newPageModeBtn.classList.add('bg-gray-700', 'text-gray-300');
+    }
+}

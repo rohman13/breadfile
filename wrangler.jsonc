@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "breadfile",
+  "compatibility_date": "2026-08-13",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    {
+      "pattern": "bread.beno.app",
+      "custom_domain": true
+    }
+  ]
+}

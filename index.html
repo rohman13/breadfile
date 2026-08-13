@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f4f0e7" />
+  <meta name="description" content="A small, private PDF toolbox that works in your browser." />
+  <title>BreadFile — Play with PDFs, privately</title>
+  <link rel="icon" href="/images/favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link href="/src/css/styles.css" rel="stylesheet" />
+</head>
+<body>
+  <nav class="bread-nav">
+    <div class="bread-nav__inner">
+      <a id="home-logo" href="/" class="bread-brand" aria-label="BreadFile home">
+        <span class="bread-brand__mark" aria-hidden="true">B</span>
+        <span>BreadFile</span>
+      </a>
+      <div class="bread-nav__note">
+        <i data-lucide="lock-keyhole" aria-hidden="true"></i>
+        <span>Files stay on this device</span>
+      </div>
+    </div>
+  </nav>
+
+  <main id="app" class="bread-shell">
+    <section id="hero-section" class="bread-hero">
+      <div class="bread-hero__copy">
+        <span class="bread-kicker">A tiny workshop for your PDFs</span>
+        <h1>PDF chores.<br><span>Much less boring.</span></h1>
+        <p>Put pages together, pull them apart, turn them around, or tidy the order. Nothing gets uploaded.</p>
+        <a class="bread-cta" href="#tools-header">
+          Pick a tool <i data-lucide="arrow-down" aria-hidden="true"></i>
+        </a>
+      </div>
+      <div class="bread-hero__scene" aria-hidden="true">
+        <div class="paper paper--back"><span>3</span></div>
+        <div class="paper paper--middle"><span>2</span></div>
+        <div class="paper paper--front">
+          <span class="paper__face">•ᴗ•</span>
+          <span class="paper__line"></span><span class="paper__line paper__line--short"></span>
+        </div>
+        <span class="spark spark--one">✦</span><span class="spark spark--two">✦</span>
+      </div>
+    </section>
+
+    <section id="features-section" class="bread-promises" aria-label="BreadFile promises">
+      <div><i data-lucide="mouse-pointer-2"></i><span><strong>Easy to use</strong><small>Big controls, clear steps</small></span></div>
+      <div><i data-lucide="wifi-off"></i><span><strong>Works locally</strong><small>No waiting for uploads</small></span></div>
+      <div><i data-lucide="tablet"></i><span><strong>Tablet ready</strong><small>Made for fingers too</small></span></div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section id="tools-header" class="bread-tools-heading">
+      <span class="bread-kicker">Choose your next move</span>
+      <h2>What should we do with your PDF?</h2>
+    </section>
+
+    <section id="grid-view" class="bread-tools-area">
+      <label class="bread-search" for="search-bar">
+        <i data-lucide="search" aria-hidden="true"></i>
+        <input id="search-bar" type="search" placeholder="Find a tool" autocomplete="off" />
+      </label>
+      <div id="tool-grid" class="bread-tool-grid"></div>
+    </section>
+
+    <section id="tool-interface" class="hidden bread-workbench" aria-live="polite">
+      <button id="back-to-grid" class="bread-back" type="button">
+        <i data-lucide="arrow-left" aria-hidden="true"></i><span>All tools</span>
+      </button>
+      <div id="tool-content"></div>
+    </section>
+
+    <div id="loader-modal" class="hidden bread-overlay" role="status" aria-live="polite">
+      <div class="bread-dialog bread-dialog--loading">
+        <div class="bread-loader" aria-hidden="true"><span>•ᴗ•</span></div>
+        <p id="loader-text">Working on it…</p>
+      </div>
+    </div>
+
+    <div id="alert-modal" class="hidden bread-overlay" role="dialog" aria-modal="true" aria-labelledby="alert-title">
+      <div class="bread-dialog">
+        <div class="bread-dialog__dot" aria-hidden="true">!</div>
+        <h3 id="alert-title">Something needs attention</h3>
+        <p id="alert-message"></p>
+        <button id="alert-ok" class="bread-primary" type="button">Got it</button>
+      </div>
+    </div>
+
+    <div id="preview-modal" class="hidden bread-overlay" role="dialog" aria-modal="true">
+      <div class="bread-preview-dialog">
+        <header><h3>Document preview</h3><div>
+          <button id="preview-download-btn" class="bread-primary">Download PDF</button>
+          <button id="preview-close-btn" class="bread-secondary">Close</button>
+        </div></header>
+        <div id="preview-content"></div>
+      </div>
+    </div>
+
+    <section class="bread-how hide-section">
+      <div class="bread-how__art" aria-hidden="true"><span>PDF</span><i data-lucide="sparkles"></i></div>
+      <div>
+        <span class="bread-kicker">Private by default</span>
+        <h2>Your file never takes a trip.</h2>
+        <p>BreadFile does the work inside your browser. Close the tab and the file is gone from the app.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bread-footer hide-section">
+    <div><strong>BreadFile</strong><span>Built for small PDF jobs.</span></div>
+    <span>Based on the open-source BentoPDF engine.</span>
+  </footer>
+
+  <div id="signature-ghost" class="hidden"></div>
+  <script type="module" src="/src/js/main.ts"></script>
+</body>
+</html>

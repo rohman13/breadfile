@@ -1,0 +1,10 @@
+{
+  "name": "BreadFile",
+  "short_name": "BreadFile",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "description": "Private, browser-based PDF tools.",
+  "icons": [{ "src": "/images/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
