@@ -1,18 +1,25 @@
-const CACHE = 'breadfile-shell-v1';
-const SHELL = ['/', '/index.html', '/manifest.webmanifest'];
+const LEGACY_CACHE = 'breadfile-shell-v1';
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async () => {
+    const cacheNames = await caches.keys();
+    const needsRecovery = cacheNames.includes(LEGACY_CACHE);
+    await Promise.all(cacheNames.map((name) => caches.delete(name)));
+    await self.clients.claim();
+
+    // The old worker may already have served HTML that points at assets removed
+    // by a newer deployment. Reload controlled tabs once after deleting that
+    // stale cache so affected devices repair themselves automatically.
+    if (needsRecovery) {
+      const clients = await self.clients.matchAll({ type: 'window' });
+      await Promise.all(clients.map((client) => client.navigate(client.url)));
+    }
+  })());
 });
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
-});
+// Build assets are fingerprinted by Vite and cached correctly by the browser and
+// Cloudflare. The service worker deliberately does not intercept requests.
