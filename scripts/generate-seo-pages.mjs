@@ -187,14 +187,15 @@ const source = (await readFile(resolve(root, 'index.html'), 'utf8'))
   .replace(/^\s*<link rel="canonical"[^>]*>\s*$/gim, '')
   .replace(/^\s*<meta property="og:[^"]+"[^>]*>\s*$/gim, '')
   .replace(/^\s*<meta name="twitter:[^"]+"[^>]*>\s*$/gim, '')
-  .replace(/^\s*<script type="application\/ld\+json">.*?<\/script>\s*$/gim, '');
+  .replace(/^\s*<script type="application\/ld\+json">.*?<\/script>\s*$/gim, '')
+  .replace(/\s*<section class="bread-seo-home hide-section"[\s\S]*?<\/section>/i, '');
 for (const tool of tools) {
   let html = source
     .replace(/<meta name="description"[^>]*>\s*/i, '')
     .replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(tool.title)}</title>`)
     .replace('  <link rel="icon"', `${headMetadata(tool)}\n  <link rel="icon"`)
     .replace('<body>', `<body data-tool-id="${tool.id}" class="tool-landing-page">`)
-    .replace('<h1>PDF chores.<br><span>Much less boring.</span></h1>', `<p class="bread-hero__title">${escapeHtml(tool.h1)}</p>`)
+    .replace(/<h1>Free private PDF tools\.<br><span>No uploads required\.<\/span><\/h1>/i, `<p class="bread-hero__title">${escapeHtml(tool.h1)}</p>`)
     .replace('<p>Put pages together, pull them apart, turn them around, or tidy the order. Nothing gets uploaded.</p>', `<p>${escapeHtml(tool.lead)}</p>`)
     .replace('id="hero-section" class="bread-hero"', 'id="hero-section" class="bread-hero hidden"')
     .replace('id="features-section" class="bread-promises"', 'id="features-section" class="bread-promises hidden"')

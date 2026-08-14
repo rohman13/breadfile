@@ -23,6 +23,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Extract PDF Pages","url":"https://bread.beno.app/extract-pdf-pages/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript and a modern web browser","description":"Extract selected pages from a PDF into new files. Choose pages visually and download them privately without uploading your document.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["Choose pages from a visual preview","Save each selected page as a PDF","Keep the source document on your device"],"provider":{"@type":"Organization","name":"BreadFile","url":"https://bread.beno.app"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What format are extracted pages saved in?","acceptedAnswer":{"@type":"Answer","text":"Each selected page is saved as its own PDF and packaged in a ZIP download."}},{"@type":"Question","name":"Will the original PDF be changed?","acceptedAnswer":{"@type":"Answer","text":"No. BreadFile creates new files and leaves your original document untouched."}}]}</script>
   <link rel="icon" href="/images/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link href="/src/css/styles.css" rel="stylesheet" />
 </head>
@@ -130,7 +131,7 @@
       <div class="bread-how__art" aria-hidden="true">
         <div class="safe-drawer"><span class="safe-drawer__slot"></span><span class="safe-drawer__handle"></span><i data-lucide="lock-keyhole"></i></div>
         <span class="safe-paper safe-paper--back"></span>
-        <span class="safe-paper safe-paper--front"><i></i><b></b></span>
+        <span class="safe-paper safe-paper--front"><i></i><span class="safe-paper__detail"></span></span>
         <span class="safe-caption">STAYS HERE</span>
       </div>
       <div>

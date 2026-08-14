@@ -185,6 +185,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .tool-seo-faq summary { cursor:pointer; font-weight:700; }.tool-seo-faq p { color:var(--muted); line-height:1.65; max-width:760px; }
 .tool-privacy-note { background:var(--sage-soft); }.tool-privacy-note p { margin:6px 0 0; color:var(--muted); }
 .tool-landing-page .bread-workbench { padding-top:34px; }
+.bread-seo-home { margin:0 0 86px; padding:clamp(30px,5vw,58px); border:1px solid var(--line); border-radius:18px; background:#f8f5ed; }
+.bread-seo-home__intro,.bread-seo-home__privacy { max-width:850px; }
+.bread-seo-home h2 { margin:9px 0 17px; font-family:Georgia,"Times New Roman",serif; font-size:clamp(31px,4.5vw,47px); line-height:1.08; letter-spacing:-.035em; }
+.bread-seo-home p { color:var(--muted); font-size:16px; line-height:1.72; }
+.bread-tool-links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:34px 0 52px; }
+.bread-tool-links a { display:flex; flex-direction:column; gap:5px; min-height:94px; padding:18px 20px; border:1px solid var(--line); border-radius:12px; background:#fffdf8; color:var(--ink); transition:transform .15s ease,border-color .15s ease; }
+.bread-tool-links a:hover { transform:translateY(-2px); border-color:#8d9287; }.bread-tool-links span { color:var(--muted); font-size:14px; line-height:1.45; }
+.bread-seo-home__privacy a { color:var(--sage); font-weight:700; text-decoration:underline; text-underline-offset:3px; }
 
 /* Little Paper Workshop */
 .hero-clip { position: absolute; width: 27px; height: 58px; border: 2px solid #748493; border-radius: 15px 15px 12px 12px; transform: rotate(22deg); opacity: .78; }
@@ -274,8 +282,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .safe-paper { position: absolute; width: 94px; height: 118px; border: 1.5px solid #697875; border-radius: 4px 6px 3px 5px; }
 .safe-paper--back { left: 32%; top: 28px; background: #eacfc3; transform: rotate(-11deg); }
 .safe-paper--front { left: 42%; top: 17px; background: #fbf8ed; transform: rotate(5deg); box-shadow: 2px 4px 7px rgba(55,52,45,.1); }
-.safe-paper--front i, .safe-paper--front b { position: absolute; left: 20px; right: 20px; height: 4px; border-radius: 3px; background: #9cacaa; }
-.safe-paper--front i { top: 43px; }.safe-paper--front b { top: 57px; right: 36px; background: #d5b09f; }
+.safe-paper--front i, .safe-paper--front .safe-paper__detail { position: absolute; left: 20px; right: 20px; height: 4px; border-radius: 3px; background: #9cacaa; }
+.safe-paper--front i { top: 43px; }.safe-paper--front .safe-paper__detail { top: 57px; right: 36px; background: #d5b09f; }
 .safe-caption { position: absolute; right: 11px; top: 16px; padding: 4px 7px; border: 1px solid rgba(94,106,99,.28); border-radius: 3px; color: #61716d; background: rgba(244,242,229,.58); font: 800 8px/1 system-ui,sans-serif; letter-spacing: .16em; transform: rotate(3deg); }
 .bread-how__art > svg { display: none; }
 
@@ -356,6 +364,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .bread-tool-station { width: 100%; padding-inline: 20px; }.workshop-note { grid-column: span 2; }
   .signature-editor { grid-template-columns: 1fr; }.signature-document { padding: 15px; }#canvas-container-sign { height: 58vh; min-height: 390px; }
   .tool-seo-grid { grid-template-columns:1fr; }.bread-footer { flex-direction:column; }
+  .bread-tool-links { grid-template-columns:1fr; }
 }
 @media (max-width: 520px) {
   .bread-nav__note span { display: none; }.bread-shell { width: min(100% - 22px, 1180px); }.bread-hero { padding-top: 50px; }.bread-hero h1 { font-size: 46px; }.bread-tool-station { margin-bottom: 52px; padding: 49px 11px 12px; border-radius: 16px 13px 18px 14px; }.bread-tool-station::before { top: 14px; left: 16px; }.bread-tools-heading { padding-inline: 10px; }.bread-tools-heading h2 { font-size: 35px; }.bread-tools-heading > p { font-size: 14px; }.bread-search { width: calc(100% - 10px); margin-bottom: 15px; }.bread-tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }.tool-card { min-height: 184px; padding: 15px !important; }.tool-card > i, .tool-card > svg { top: 14px; left: 14px; width: 32px !important; height: 32px !important; }.tool-card__accessory { top: 18px; right: 9px; transform: scale(.72); transform-origin: top right; }.tool-card__accessory[data-art="organize"] { transform: scale(.58) rotate(-2deg); }.tool-card h3 { font-size: 17px; }.tool-card p { max-width: 100%; font-size: 11px !important; line-height: 1.35; }.tool-card::before { right: 13px; width: 38px; }.workshop-note { min-height: 170px; grid-column: span 2; gap: 12px; padding: 20px 16px; }.workshop-note__pencil { width: 66px; flex-basis: 66px; transform: rotate(-24deg) scale(.85); }.workshop-note strong { font-size: 18px; }.workshop-divider { margin: 42px auto 27px; }.hero-pencil { left: 7%; }.hero-clip--one { right: 10%; }.bread-how { gap: 29px; padding: 21px 16px 30px; }.bread-how__art { width: 100%; min-height: 230px; }.safe-paper { width: 78px; height: 101px; }.safe-paper--back { left: 30%; }.safe-paper--front { left: 42%; }.bread-how h2 { font-size: 36px; }.bread-how p { margin: 0; font-size: 16px; }.bread-workbench { margin-top: 22px; padding: 19px; border-radius: 14px; }.section-divider { margin: 58px auto; }#page-organizer, #page-rotator, #page-selector-grid, #page-merge-preview { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }.bread-preview-dialog header { align-items: flex-start; flex-direction: column; }.bread-preview-dialog header div { width: 100%; flex-direction: column; }.bread-primary, .bread-secondary { width: 100%; }.bread-footer div { flex-direction: column; gap: 0; }

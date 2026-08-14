@@ -21,6 +21,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"BreadFile","url":"https://bread.beno.app/","description":"Free private PDF tools that process files locally in your browser."}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"BreadFile","url":"https://bread.beno.app/","logo":"https://bread.beno.app/images/favicon.svg"}</script>
   <link rel="icon" href="/images/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link href="/src/css/styles.css" rel="stylesheet" />
 </head>
@@ -42,7 +43,7 @@
     <section id="hero-section" class="bread-hero">
       <div class="bread-hero__copy">
         <span class="bread-kicker">A tiny workshop for your PDFs</span>
-        <h1>PDF chores.<br><span>Much less boring.</span></h1>
+        <h1>Free private PDF tools.<br><span>No uploads required.</span></h1>
         <p>Put pages together, pull them apart, turn them around, or tidy the order. Nothing gets uploaded.</p>
         <a class="bread-cta" href="#tools-header">
           Pick a tool <i data-lucide="arrow-down" aria-hidden="true"></i>
@@ -121,13 +122,39 @@
       <div class="bread-how__art" aria-hidden="true">
         <div class="safe-drawer"><span class="safe-drawer__slot"></span><span class="safe-drawer__handle"></span><i data-lucide="lock-keyhole"></i></div>
         <span class="safe-paper safe-paper--back"></span>
-        <span class="safe-paper safe-paper--front"><i></i><b></b></span>
+        <span class="safe-paper safe-paper--front"><i></i><span class="safe-paper__detail"></span></span>
         <span class="safe-caption">STAYS HERE</span>
       </div>
       <div>
         <span class="bread-kicker">Private by default</span>
         <h2>Your file never takes a trip.</h2>
         <p>BreadFile does the work inside your browser. Close the tab and the file is gone from the app.</p>
+      </div>
+    </section>
+
+    <section class="bread-seo-home hide-section" aria-labelledby="private-pdf-tools-title">
+      <div class="bread-seo-home__intro">
+        <span class="bread-kicker">Free private PDF tools</span>
+        <h2 id="private-pdf-tools-title">Useful PDF chores, without uploads</h2>
+        <p>BreadFile is a free collection of private PDF tools for everyday document work, with no uploads required. You can merge PDF files, split a PDF into smaller documents, compress image-heavy pages, add a visible signature, rotate sideways pages, organize page order, and convert between PDFs and images. Each tool runs directly in your browser, so your documents do not need to be uploaded to BreadFile.</p>
+        <p>Choose a task below to open its dedicated workbench. There is no account to create and no software to install. When the job is finished, BreadFile downloads a new file while leaving your original document unchanged.</p>
+      </div>
+      <nav class="bread-tool-links" aria-label="All PDF tools">
+        <a href="/merge-pdf/"><strong>Merge PDF</strong><span>Combine several PDF files in your preferred order.</span></a>
+        <a href="/split-pdf/"><strong>Split PDF</strong><span>Separate pages by ranges, intervals, or visual selection.</span></a>
+        <a href="/extract-pdf-pages/"><strong>Extract PDF pages</strong><span>Save selected pages as individual PDF files.</span></a>
+        <a href="/delete-pdf-pages/"><strong>Delete PDF pages</strong><span>Remove blank or unwanted pages from a document.</span></a>
+        <a href="/rotate-pdf/"><strong>Rotate PDF</strong><span>Turn one, several, or every page the right way up.</span></a>
+        <a href="/organize-pdf-pages/"><strong>Organize PDF pages</strong><span>Reorder, duplicate, rotate, or remove pages visually.</span></a>
+        <a href="/compress-pdf/"><strong>Compress PDF</strong><span>Reduce the size of image-heavy PDF documents.</span></a>
+        <a href="/sign-pdf/"><strong>Sign PDF</strong><span>Draw, type, upload, place, and resize a visible signature.</span></a>
+        <a href="/image-to-pdf/"><strong>Images to PDF</strong><span>Combine JPG, PNG, or WebP images into one PDF.</span></a>
+        <a href="/pdf-to-images/"><strong>PDF to images</strong><span>Export every PDF page as JPG or PNG.</span></a>
+      </nav>
+      <div class="bread-seo-home__privacy">
+        <h2>How private browser processing works</h2>
+        <p>Traditional online converters send a document to a remote server for processing. BreadFile instead uses browser technologies such as <a href="https://pdf-lib.js.org/" target="_blank" rel="noopener noreferrer">PDF-LIB</a> and <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener noreferrer">PDF.js</a> on your device. That local approach avoids file-transfer waiting and keeps document contents out of our servers. Very large files may still depend on the memory available on your phone, tablet, or computer.</p>
+        <p>BreadFile is best suited to routine PDF chores: joining reports, pulling out a page, correcting orientation, preparing images, or adding a visible signature. For certificate-based digital signatures, archival compliance, or legally regulated workflows, use a specialist service that supports those requirements.</p>
       </div>
     </section>
   </main>

@@ -23,6 +23,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Sign PDF","url":"https://bread.beno.app/sign-pdf/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript and a modern web browser","description":"Add a visible signature or stamp to a PDF online for free. Draw, type, upload, resize, and place marks privately in your browser.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["Draw, type, or upload a signature","Move and resize marks on any page","Keep signatures and documents on your device"],"provider":{"@type":"Organization","name":"BreadFile","url":"https://bread.beno.app"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is this a cryptographic digital signature?","acceptedAnswer":{"@type":"Answer","text":"No. BreadFile adds a visible electronic signature or stamp, like signing printed paper. It does not issue a certificate-based digital signature."}},{"@type":"Question","name":"Can I sign more than one page?","acceptedAnswer":{"@type":"Answer","text":"Yes. Navigate between pages and place one or more marks wherever they are needed."}}]}</script>
   <link rel="icon" href="/images/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link href="/src/css/styles.css" rel="stylesheet" />
 </head>
@@ -130,7 +131,7 @@
       <div class="bread-how__art" aria-hidden="true">
         <div class="safe-drawer"><span class="safe-drawer__slot"></span><span class="safe-drawer__handle"></span><i data-lucide="lock-keyhole"></i></div>
         <span class="safe-paper safe-paper--back"></span>
-        <span class="safe-paper safe-paper--front"><i></i><b></b></span>
+        <span class="safe-paper safe-paper--front"><i></i><span class="safe-paper__detail"></span></span>
         <span class="safe-caption">STAYS HERE</span>
       </div>
       <div>
