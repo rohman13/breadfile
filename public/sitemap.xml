@@ -11,9 +11,9 @@
   <url><loc>https://bread.beno.app/sign-pdf/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://bread.beno.app/image-to-pdf/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://bread.beno.app/pdf-to-images/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://bread.beno.app/about.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
-  <url><loc>https://bread.beno.app/faq.html</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://bread.beno.app/privacy.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
-  <url><loc>https://bread.beno.app/terms.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
-  <url><loc>https://bread.beno.app/contact.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://bread.beno.app/about</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://bread.beno.app/faq</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bread.beno.app/privacy</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://bread.beno.app/terms</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://bread.beno.app/contact</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>
