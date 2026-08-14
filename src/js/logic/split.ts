@@ -7,6 +7,8 @@ import JSZip from 'jszip';
 import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { normalizePageSelection } from '../utils/pageSelection.js';
+import { resolveScissorRange } from '../utils/splitRange.js';
+import { createIcons, icons } from 'lucide';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url
@@ -14,6 +16,46 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 // Track if visual selector has been rendered to avoid duplicates
 let visualSelectorRendered = false;
+let selectedScissorPages: number[] = [];
+
+function updateScissorSelection(totalPages: number) {
+    const range = resolveScissorRange(selectedScissorPages, totalPages);
+    const selected = new Set(range?.pages ?? []);
+    document.querySelectorAll<HTMLElement>('#page-selector-grid .page-thumbnail-wrapper').forEach((card) => {
+        const page = Number(card.dataset.pageNumber);
+        card.classList.toggle('selected', selected.has(page));
+        card.classList.toggle('is-range-start', page === range?.start);
+        card.classList.toggle('is-range-end', page === range?.end);
+    });
+    document.querySelectorAll<HTMLButtonElement>('#page-selector-grid .split-scissor').forEach((button) => {
+        const page = Number(button.dataset.pageNumber);
+        const active = selectedScissorPages.includes(page);
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+
+    const summary = document.getElementById('visual-range-summary');
+    if (!summary) return;
+    if (!range) {
+        summary.textContent = 'Tap a scissor to select pages from page 1.';
+    } else if (selectedScissorPages.length === 1) {
+        summary.textContent = `Pages 1–${range.end} selected. Tap another scissor to choose a different start.`;
+    } else {
+        summary.textContent = `Pages ${range.start}–${range.end} selected.`;
+    }
+}
+
+function toggleScissor(pageNumber: number, totalPages: number) {
+    const existing = selectedScissorPages.indexOf(pageNumber);
+    if (existing >= 0) {
+        selectedScissorPages.splice(existing, 1);
+    } else if (selectedScissorPages.length >= 2) {
+        selectedScissorPages = [pageNumber];
+    } else {
+        selectedScissorPages.push(pageNumber);
+    }
+    updateScissorSelection(totalPages);
+}
 
 
 async function renderVisualSelector() {
@@ -24,6 +66,7 @@ async function renderVisualSelector() {
     if (visualSelectorRendered) return;
 
     visualSelectorRendered = true;
+    selectedScissorPages = [];
 
     container.textContent = '';
         
@@ -41,9 +84,10 @@ async function renderVisualSelector() {
             await page.render({ canvasContext: canvas.getContext('2d'), canvas, viewport: viewport }).promise;
             
             const wrapper = document.createElement('div');
-            wrapper.className = 'page-thumbnail-wrapper p-1 border-2 border-transparent rounded-lg cursor-pointer hover:border-indigo-500';
+            wrapper.className = 'page-thumbnail-wrapper split-page-card p-1 border-2 border-transparent rounded-lg';
             // @ts-expect-error TS(2322) FIXME: Type 'number' is not assignable to type 'string'.
             wrapper.dataset.pageIndex = i - 1;
+            wrapper.dataset.pageNumber = String(i);
 
             const img = document.createElement('img');
             img.src = canvas.toDataURL();
@@ -53,24 +97,25 @@ async function renderVisualSelector() {
             p.textContent = `Page ${i}`; 
             wrapper.append(img, p);
                         
-            const handleSelection = (e: any) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const isSelected = wrapper.classList.contains('selected');
-                
-                if (isSelected) {
-                    wrapper.classList.remove('selected', 'border-indigo-500');
-                    wrapper.classList.add('border-transparent');
-                } else {
-                    wrapper.classList.add('selected', 'border-indigo-500');
-                    wrapper.classList.remove('border-transparent');
-                }
-            };
-
-            wrapper.addEventListener('click', handleSelection);
-            container.appendChild(wrapper);
+            const unit = document.createElement('div');
+            unit.className = 'split-page-unit';
+            const scissor = document.createElement('button');
+            scissor.type = 'button';
+            scissor.className = 'split-scissor';
+            scissor.dataset.pageNumber = String(i);
+            scissor.setAttribute('aria-label', `Use page ${i} as a range endpoint`);
+            scissor.setAttribute('aria-pressed', 'false');
+            scissor.innerHTML = '<i data-lucide="scissors" aria-hidden="true"></i><span class="sr-only">Page ' + i + '</span>';
+            scissor.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleScissor(i, pdf.numPages);
+            });
+            unit.append(wrapper, scissor);
+            container.appendChild(unit);
         }
+        updateScissorSelection(pdf.numPages);
+        createIcons({ icons });
     } catch (error) {
         console.error('Error rendering visual selector:', error);
         showAlert('Error', 'Failed to render page previews.');
@@ -97,6 +142,7 @@ export function setupSplitTool() {
                 
         if (mode !== 'visual') {
             visualSelectorRendered = false;
+            selectedScissorPages = [];
             const container = document.getElementById('page-selector-grid');
             if (container) container.innerHTML = '';
         }
@@ -168,7 +214,7 @@ export async function split() {
                 indicesToExtract = Array.from({ length: totalPages }, (_, i) => i);
                 break;
             case 'visual':
-                indicesToExtract = Array.from(document.querySelectorAll<HTMLElement>('#page-selector-grid > .page-thumbnail-wrapper.selected'))
+                indicesToExtract = Array.from(document.querySelectorAll<HTMLElement>('#page-selector-grid .page-thumbnail-wrapper.selected'))
                     .map((element) => Number(element.dataset.pageIndex));
                 break;
         }

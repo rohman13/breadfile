@@ -356,9 +356,10 @@ export const toolTemplates = {
         <div id="visual-select-panel">
              <div class="p-3 bg-gray-900 rounded-lg border border-gray-700 mb-3">
                 <p class="text-sm text-gray-300"><strong class="text-white">How it works:</strong></p>
-                <p class="text-xs text-gray-400 mt-1">Click on the page thumbnails below to select them. Click again to deselect. All selected pages will be extracted.</p>
+                <p class="text-xs text-gray-400 mt-1">Tap one scissor to select pages 1 through that page. Tap a second scissor to use both page numbers as an inclusive range.</p>
             </div>
-             <div id="page-selector-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4 p-4 bg-gray-900 rounded-lg border border-gray-700 min-h-[150px]"></div>
+             <p id="visual-range-summary" class="split-range-summary" aria-live="polite">Tap a scissor to select pages from page 1.</p>
+             <div id="page-selector-grid" class="split-scissor-grid p-4 bg-gray-900 rounded-lg border border-gray-700 min-h-[150px]"></div>
         </div>
 
         <div id="all-pages-panel" class="hidden p-3 bg-gray-900 rounded-lg border border-gray-700">
