@@ -25,7 +25,7 @@ const tools = [
     h1: 'Split a PDF into the files you need',
     lead: 'Cut one PDF into smaller documents by ranges, intervals, or selected pages. Everything is processed locally in your browser.',
     benefits: ['Split by custom page ranges', 'Create a file every set number of pages', 'Select pages visually before downloading'],
-    steps: ['Choose the PDF you want to split.', 'Select ranges, intervals, or pages.', 'Cut and download the resulting PDF or ZIP.'],
+    steps: ['Choose the PDF you want to split.', 'Select ranges, intervals, or pages.', 'Cut and download the resulting PDFs in one ZIP.'],
     faqs: [
       ['Can I split only certain pages?', 'Yes. Use visual selection or enter page ranges to choose exactly which pages belong together.'],
       ['Does splitting reduce PDF quality?', 'No. BreadFile copies the selected PDF pages without rasterizing them.'],
