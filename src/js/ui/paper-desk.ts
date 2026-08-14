@@ -3,7 +3,7 @@ import { state } from '../state.js';
 
 const COPY: Record<string, { verb: string; summary: string; output: string }> = {
   merge: { verb: 'Bind my PDFs', summary: 'Files will be packed into one PDF in the order shown.', output: 'merged.pdf' },
-  split: { verb: 'Cut & pack pages', summary: 'Your chosen groups will be packed as a PDF or ZIP.', output: 'split-document.pdf' },
+  split: { verb: 'Cut & pack pages', summary: 'Your chosen groups will be packed as separate PDFs inside one ZIP.', output: 'split-document.pdf' },
   'extract-pages': { verb: 'Pack selected pages', summary: 'Selected pages will be packed as individual PDFs in a ZIP.', output: 'extracted-pages.zip' },
   'delete-pages': { verb: 'Make my trimmed PDF', summary: 'Marked pages will be removed. Everything else stays in order.', output: 'pages-removed.pdf' },
   rotate: { verb: 'Make my rotated PDF', summary: 'The turns shown on the desk will be applied to the new PDF.', output: 'rotated.pdf' },
