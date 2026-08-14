@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "seo:generate": "node scripts/generate-seo-pages.mjs",
+    "build": "npm run seo:generate && tsc && vite build",
     "preview": "vite preview",
     "obfuscate": "node scripts/build.mjs",
     "test": "vitest",

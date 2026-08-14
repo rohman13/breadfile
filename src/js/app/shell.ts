@@ -2,6 +2,7 @@ import { createIcons, icons } from 'lucide';
 import { toolRegistry, findTool } from '../tools/registry.js';
 import type { AppServices, ToolModule } from '../tools/contracts.js';
 import { state, resetState } from '../state.js';
+import { toolHref } from '../tools/routes.js';
 
 function required<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
@@ -25,8 +26,8 @@ export class AppShell {
     tools.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6';
 
     toolRegistry.forEach((tool) => {
-      const card = document.createElement('button');
-      card.type = 'button';
+      const card = document.createElement('a');
+      card.href = toolHref(tool.id);
       card.className = 'tool-card bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center';
       card.dataset.toolId = tool.id;
       card.setAttribute('aria-label', `${tool.name}: ${tool.subtitle}`);
@@ -64,9 +65,18 @@ export class AppShell {
       const target = event.target;
       if (!(target instanceof Element)) return;
       const card = target.closest<HTMLElement>('.tool-card');
-      if (card?.dataset.toolId) void this.openTool(card.dataset.toolId);
+      if (card?.dataset.toolId) {
+        event.preventDefault();
+        void this.openTool(card.dataset.toolId);
+      }
     });
-    required<HTMLButtonElement>('back-to-grid').addEventListener('click', () => void this.showGrid());
+    required<HTMLButtonElement>('back-to-grid').addEventListener('click', () => {
+      if (document.body.dataset.toolId) {
+        window.location.href = '/#tools-header';
+        return;
+      }
+      void this.showGrid();
+    });
     document.querySelector<HTMLAnchorElement>('.bread-cta[href="#tools-header"]')?.addEventListener('click', (event) => {
       event.preventDefault();
       this.scrollToTools('smooth');

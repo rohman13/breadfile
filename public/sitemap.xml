@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://bread.beno.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://bread.beno.app/merge-pdf/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://bread.beno.app/split-pdf/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://bread.beno.app/extract-pdf-pages/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bread.beno.app/delete-pdf-pages/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bread.beno.app/rotate-pdf/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bread.beno.app/organize-pdf-pages/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bread.beno.app/compress-pdf/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://bread.beno.app/sign-pdf/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://bread.beno.app/image-to-pdf/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://bread.beno.app/pdf-to-images/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://bread.beno.app/about.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://bread.beno.app/faq.html</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://bread.beno.app/privacy.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://bread.beno.app/terms.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://bread.beno.app/contact.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+</urlset>

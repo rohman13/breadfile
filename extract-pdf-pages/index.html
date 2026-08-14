@@ -4,27 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#f4f0e7" />
-  <meta name="description" content="Free private PDF tools to merge, split, compress, sign, rotate, organize, and convert files directly in your browser. No uploads or account." />
+  <title>Extract Pages from PDF Online Free | BreadFile</title>
+
+
+  <meta name="description" content="Extract selected pages from a PDF into new files. Choose pages visually and download them privately without uploading your document." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
-  <title>Free Private PDF Tools—No Uploads | BreadFile</title>
-  <link rel="canonical" href="https://bread.beno.app/" />
+  <link rel="canonical" href="https://bread.beno.app/extract-pdf-pages/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="BreadFile" />
-  <meta property="og:title" content="Free Private PDF Tools—No Uploads | BreadFile" />
-  <meta property="og:description" content="Merge, split, compress, sign, rotate, organize, and convert PDFs locally in your browser." />
-  <meta property="og:url" content="https://bread.beno.app/" />
+  <meta property="og:title" content="Extract Pages from PDF Online Free | BreadFile" />
+  <meta property="og:description" content="Extract selected pages from a PDF into new files. Choose pages visually and download them privately without uploading your document." />
+  <meta property="og:url" content="https://bread.beno.app/extract-pdf-pages/" />
   <meta property="og:image" content="https://bread.beno.app/images/breadfile-social.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Free Private PDF Tools—No Uploads | BreadFile" />
-  <meta name="twitter:description" content="Useful PDF tools that process files privately on your device." />
+  <meta name="twitter:title" content="Extract Pages from PDF Online Free | BreadFile" />
+  <meta name="twitter:description" content="Extract selected pages from a PDF into new files. Choose pages visually and download them privately without uploading your document." />
   <meta name="twitter:image" content="https://bread.beno.app/images/breadfile-social.png" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"BreadFile","url":"https://bread.beno.app/","description":"Free private PDF tools that process files locally in your browser."}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"BreadFile","url":"https://bread.beno.app/","logo":"https://bread.beno.app/images/favicon.svg"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Extract PDF Pages","url":"https://bread.beno.app/extract-pdf-pages/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript and a modern web browser","description":"Extract selected pages from a PDF into new files. Choose pages visually and download them privately without uploading your document.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["Choose pages from a visual preview","Save each selected page as a PDF","Keep the source document on your device"],"provider":{"@type":"Organization","name":"BreadFile","url":"https://bread.beno.app"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What format are extracted pages saved in?","acceptedAnswer":{"@type":"Answer","text":"Each selected page is saved as its own PDF and packaged in a ZIP download."}},{"@type":"Question","name":"Will the original PDF be changed?","acceptedAnswer":{"@type":"Answer","text":"No. BreadFile creates new files and leaves your original document untouched."}}]}</script>
   <link rel="icon" href="/images/favicon.svg" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link href="/src/css/styles.css" rel="stylesheet" />
 </head>
-<body>
+<body data-tool-id="extract-pages" class="tool-landing-page">
   <nav class="bread-nav">
     <div class="bread-nav__inner">
       <a id="home-logo" href="/" class="bread-brand" aria-label="BreadFile home">
@@ -39,11 +41,11 @@
   </nav>
 
   <main id="app" class="bread-shell">
-    <section id="hero-section" class="bread-hero">
+    <section id="hero-section" class="bread-hero hidden">
       <div class="bread-hero__copy">
         <span class="bread-kicker">A tiny workshop for your PDFs</span>
-        <h1>PDF chores.<br><span>Much less boring.</span></h1>
-        <p>Put pages together, pull them apart, turn them around, or tidy the order. Nothing gets uploaded.</p>
+        <p class="bread-hero__title">Extract selected pages from a PDF</p>
+        <p>Pull out only the pages you need and save them as separate PDF files in one convenient ZIP package.</p>
         <a class="bread-cta" href="#tools-header">
           Pick a tool <i data-lucide="arrow-down" aria-hidden="true"></i>
         </a>
@@ -60,7 +62,7 @@
       </div>
     </section>
 
-    <section id="features-section" class="bread-promises" aria-label="BreadFile promises">
+    <section id="features-section" class="bread-promises hidden" aria-label="BreadFile promises">
       <div><i data-lucide="mouse-pointer-2"></i><span><strong>Easy to use</strong><small>Big controls, clear steps</small></span></div>
       <div><i data-lucide="wifi-off"></i><span><strong>Works locally</strong><small>No waiting for uploads</small></span></div>
       <div><i data-lucide="tablet"></i><span><strong>Tablet ready</strong><small>Made for fingers too</small></span></div>
@@ -68,7 +70,7 @@
 
     <div class="workshop-divider hide-section" aria-hidden="true"><span></span><i></i><span></span></div>
 
-    <div id="tool-station" class="bread-tool-station">
+    <div id="tool-station" class="bread-tool-station hidden">
       <section id="tools-header" class="bread-tools-heading">
         <span class="bread-kicker">Choose your next move</span>
         <h2>What should we do with your PDF?</h2>
@@ -84,11 +86,18 @@
       </section>
     </div>
 
-    <section id="tool-interface" class="hidden bread-workbench" aria-live="polite">
+    <section id="tool-interface" class="bread-workbench" aria-live="polite">
       <button id="back-to-grid" class="bread-back" type="button">
         <i data-lucide="arrow-left" aria-hidden="true"></i><span>All tools</span>
       </button>
       <div id="tool-content"></div>
+      <section class="tool-seo-content" aria-labelledby="tool-guide-title">
+    <nav class="tool-breadcrumb" aria-label="Breadcrumb"><a href="/">BreadFile</a><span aria-hidden="true">/</span><span>Extract PDF Pages</span></nav>
+    <div class="tool-seo-intro"><span class="bread-kicker">Free · private · browser-based</span><h1 id="tool-guide-title">Extract selected pages from a PDF</h1><p>Pull out only the pages you need and save them as separate PDF files in one convenient ZIP package.</p></div>
+    <div class="tool-seo-grid"><article><h3>What you can do</h3><ul><li>Choose pages from a visual preview</li><li>Save each selected page as a PDF</li><li>Keep the source document on your device</li></ul></article><article><h3>Three simple steps</h3><ol><li>Open your PDF.</li><li>Mark the pages you want to extract.</li><li>Download the selected pages in a ZIP file.</li></ol></article></div>
+    <div class="tool-seo-faq"><h2>Extract PDF Pages questions</h2><details><summary>What format are extracted pages saved in?</summary><p>Each selected page is saved as its own PDF and packaged in a ZIP download.</p></details><details><summary>Will the original PDF be changed?</summary><p>No. BreadFile creates new files and leaves your original document untouched.</p></details></div>
+    <aside class="tool-privacy-note"><strong>Your documents stay private.</strong><p>BreadFile processes files locally in your browser. Your PDF is not uploaded to our servers.</p></aside>
+  </section>
     </section>
 
     <div id="loader-modal" class="hidden bread-overlay" role="status" aria-live="polite">
@@ -132,7 +141,7 @@
     </section>
   </main>
 
-  <footer class="bread-footer hide-section">
+  <footer class="bread-footer hide-section hidden">
     <div><strong>BreadFile</strong><span>Built for small, private PDF jobs.</span></div>
     <nav aria-label="Footer"><a href="/about.html">About</a><a href="/faq.html">FAQ</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></nav>
   </footer>

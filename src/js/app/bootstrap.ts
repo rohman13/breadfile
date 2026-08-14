@@ -20,6 +20,8 @@ export function bootstrap(): void {
   });
   shell.renderToolGrid();
   shell.setupInteractions();
+  const landingTool = document.body.dataset.toolId;
+  if (landingTool) void shell.openTool(landingTool);
   document.getElementById('alert-ok')?.addEventListener('click', () => alertService.hide());
   setupFaqAccordion();
   createIcons({ icons });
