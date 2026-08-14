@@ -356,9 +356,9 @@ export const toolTemplates = {
         <div id="visual-select-panel">
              <div class="p-3 bg-gray-900 rounded-lg border border-gray-700 mb-3">
                 <p class="text-sm text-gray-300"><strong class="text-white">How it works:</strong></p>
-                <p class="text-xs text-gray-400 mt-1">Tap one scissor to select pages 1 through that page. Tap a second scissor to use both page numbers as an inclusive range.</p>
+                <p class="text-xs text-gray-400 mt-1">Tap a scissor to cut after that page. Add as many cuts as you need; every resulting PDF will be packed into one ZIP.</p>
             </div>
-             <p id="visual-range-summary" class="split-range-summary" aria-live="polite">Tap a scissor to select pages from page 1.</p>
+             <p id="visual-range-summary" class="split-range-summary" aria-live="polite">Tap a scissor to cut the PDF after that page.</p>
              <div id="page-selector-grid" class="split-scissor-grid p-4 bg-gray-900 rounded-lg border border-gray-700 min-h-[150px]"></div>
         </div>
 

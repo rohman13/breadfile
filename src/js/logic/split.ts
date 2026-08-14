@@ -7,7 +7,7 @@ import JSZip from 'jszip';
 import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { normalizePageSelection } from '../utils/pageSelection.js';
-import { resolveScissorRange } from '../utils/splitRange.js';
+import { resolveScissorGroups } from '../utils/splitRange.js';
 import { createIcons, icons } from 'lucide';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -19,13 +19,16 @@ let visualSelectorRendered = false;
 let selectedScissorPages: number[] = [];
 
 function updateScissorSelection(totalPages: number) {
-    const range = resolveScissorRange(selectedScissorPages, totalPages);
-    const selected = new Set(range?.pages ?? []);
+    const groups = resolveScissorGroups(selectedScissorPages, totalPages);
     document.querySelectorAll<HTMLElement>('#page-selector-grid .page-thumbnail-wrapper').forEach((card) => {
         const page = Number(card.dataset.pageNumber);
-        card.classList.toggle('selected', selected.has(page));
-        card.classList.toggle('is-range-start', page === range?.start);
-        card.classList.toggle('is-range-end', page === range?.end);
+        const groupIndex = groups.findIndex((group) => page >= group.start && page <= group.end);
+        const hasCuts = selectedScissorPages.length > 0;
+        card.classList.toggle('is-split-group', hasCuts);
+        card.classList.toggle('split-group-even', hasCuts && groupIndex % 2 === 0);
+        card.classList.toggle('split-group-odd', hasCuts && groupIndex % 2 === 1);
+        card.classList.toggle('is-cut-end', selectedScissorPages.includes(page));
+        card.dataset.splitGroup = hasCuts ? String(groupIndex + 1) : '';
     });
     document.querySelectorAll<HTMLButtonElement>('#page-selector-grid .split-scissor').forEach((button) => {
         const page = Number(button.dataset.pageNumber);
@@ -36,23 +39,22 @@ function updateScissorSelection(totalPages: number) {
 
     const summary = document.getElementById('visual-range-summary');
     if (!summary) return;
-    if (!range) {
-        summary.textContent = 'Tap a scissor to select pages from page 1.';
-    } else if (selectedScissorPages.length === 1) {
-        summary.textContent = `Pages 1–${range.end} selected. Tap another scissor to choose a different start.`;
-    } else {
-        summary.textContent = `Pages ${range.start}–${range.end} selected.`;
+    if (selectedScissorPages.length === 0) {
+        summary.textContent = 'Tap a scissor to cut the PDF after that page.';
+        return;
     }
+    const labels = groups.map((group) => group.start === group.end ? `page ${group.start}` : `pages ${group.start}–${group.end}`);
+    const list = labels.length === 2 ? labels.join(' and ') : `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+    summary.textContent = `${groups.length} PDFs: ${list}.`;
 }
 
 function toggleScissor(pageNumber: number, totalPages: number) {
     const existing = selectedScissorPages.indexOf(pageNumber);
     if (existing >= 0) {
         selectedScissorPages.splice(existing, 1);
-    } else if (selectedScissorPages.length >= 2) {
-        selectedScissorPages = [pageNumber];
     } else {
         selectedScissorPages.push(pageNumber);
+        selectedScissorPages.sort((a, b) => a - b);
     }
     updateScissorSelection(totalPages);
 }
@@ -98,20 +100,23 @@ async function renderVisualSelector() {
             wrapper.append(img, p);
                         
             const unit = document.createElement('div');
-            unit.className = 'split-page-unit';
-            const scissor = document.createElement('button');
-            scissor.type = 'button';
-            scissor.className = 'split-scissor';
-            scissor.dataset.pageNumber = String(i);
-            scissor.setAttribute('aria-label', `Use page ${i} as a range endpoint`);
-            scissor.setAttribute('aria-pressed', 'false');
-            scissor.innerHTML = '<i data-lucide="scissors" aria-hidden="true"></i><span class="sr-only">Page ' + i + '</span>';
-            scissor.addEventListener('click', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                toggleScissor(i, pdf.numPages);
-            });
-            unit.append(wrapper, scissor);
+            unit.className = `split-page-unit${i === pdf.numPages ? ' split-page-unit--last' : ''}`;
+            unit.append(wrapper);
+            if (i < pdf.numPages) {
+                const scissor = document.createElement('button');
+                scissor.type = 'button';
+                scissor.className = 'split-scissor';
+                scissor.dataset.pageNumber = String(i);
+                scissor.setAttribute('aria-label', `Cut after page ${i}`);
+                scissor.setAttribute('aria-pressed', 'false');
+                scissor.innerHTML = '<span class="split-scissor__face"><i data-lucide="scissors" aria-hidden="true"></i></span><span class="sr-only">Cut after page ' + i + '</span>';
+                scissor.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleScissor(i, pdf.numPages);
+                });
+                unit.append(scissor);
+            }
             container.appendChild(unit);
         }
         updateScissorSelection(pdf.numPages);
@@ -158,7 +163,6 @@ export function setupSplitTool() {
             zipOptionWrapper.classList.remove('hidden');
         } else if (mode === 'visual') {
             visualPanel.classList.remove('hidden');
-            zipOptionWrapper.classList.remove('hidden');
             if (state.pdfDoc) void renderVisualSelector();
         } else if (mode === 'even-odd') {
             evenOddPanel.classList.remove('hidden');
@@ -189,6 +193,39 @@ export async function split() {
     try {
         const totalPages = state.pdfDoc.getPageCount();
         let indicesToExtract: number[] = [];
+
+        if (splitMode === 'visual') {
+            const cutPages = Array.from(document.querySelectorAll<HTMLElement>('#page-selector-grid .split-scissor.is-active'))
+                .map((element) => Number(element.dataset.pageNumber));
+            if (cutPages.length === 0) throw new Error('Choose at least one scissor to split the PDF.');
+
+            const groups = resolveScissorGroups(cutPages, totalPages);
+            showLoader('Creating split PDFs and ZIP...');
+            const zip = new JSZip();
+            for (const group of groups) {
+                const newPdf = await PDFLibDocument.create();
+                const indices = group.pages.map((page) => page - 1);
+                const copiedPages = await newPdf.copyPages(state.pdfDoc, indices);
+                copiedPages.forEach((page: any) => newPdf.addPage(page));
+                const pdfBytes = await newPdf.save();
+                const filename = group.start === group.end
+                    ? `page-${group.start}.pdf`
+                    : `pages-${group.start}-${group.end}.pdf`;
+                zip.file(filename, pdfBytes);
+            }
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const outputName = document.getElementById('paper-output-name') as HTMLInputElement | null;
+            if (outputName) {
+                if (!outputName.value.trim() || outputName.value.trim() === 'split-document.pdf') {
+                    outputName.value = 'split-pdfs.zip';
+                } else if (!outputName.value.toLowerCase().endsWith('.zip')) {
+                    outputName.value = `${outputName.value.replace(/\.[^.]+$/, '')}.zip`;
+                }
+            }
+            downloadFile(zipBlob, 'split-pdfs.zip');
+            visualSelectorRendered = false;
+            return;
+        }
         
         switch (splitMode) {
             case 'range':
@@ -213,10 +250,6 @@ export async function split() {
             case 'all':
                 indicesToExtract = Array.from({ length: totalPages }, (_, i) => i);
                 break;
-            case 'visual':
-                indicesToExtract = Array.from(document.querySelectorAll<HTMLElement>('#page-selector-grid .page-thumbnail-wrapper.selected'))
-                    .map((element) => Number(element.dataset.pageIndex));
-                break;
         }
 
         // Never pass stale, malformed, one-past-the-end, or duplicate DOM
@@ -225,14 +258,12 @@ export async function split() {
         let uniqueIndices = [...new Set(indicesToExtract)]
             .filter((index): index is number => Number.isInteger(index) && index >= 0 && index < totalPages)
             .sort((a, b) => a - b);
-        if (splitMode === 'visual' && uniqueIndices.length === totalPages) {
-            uniqueIndices = Array.from({ length: totalPages }, (_, index) => index);
-        }
+
         if (uniqueIndices.length === 0) {
             throw new Error('No pages were selected for splitting.');
         }
         
-        if (splitMode === 'all' || (['range', 'visual'].includes(splitMode) && downloadAsZip)) {
+        if (splitMode === 'all' || (splitMode === 'range' && downloadAsZip)) {
             showLoader('Creating ZIP file...');
             const zip = new JSZip();
             for (const index of uniqueIndices) {
@@ -253,9 +284,7 @@ export async function split() {
             downloadFile(new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' }), 'split-document.pdf');
         }
         
-        if (splitMode === 'visual') {
-            visualSelectorRendered = false;
-        }
+
     } catch (e) {
         console.error(e);
         showAlert('Error', e.message || 'Failed to split PDF. Please check your selection.');
